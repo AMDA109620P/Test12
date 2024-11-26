@@ -1,1 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Dictionary</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 50px;
+        }
 
+        h1 {
+            color: #007BFF;
+        }
+
+        #random-word {
+            font-size: 20px;
+            margin: 10px;
+            padding: 15px;
+            background-color: #e7f3ff;
+            border: 1px solid #007BFF;
+            border-radius: 5px;
+            width: 300px;
+            font-weight: bold;
+            color: #007BFF;
+            text-align: center;
+        }
+
+        #search-box {
+            padding: 8px;
+            margin: 10px;
+            width: 250px;
+            border: 1px solid #007BFF;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        .box {
+            background-color: #f7faff;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #search-results {
+            background-color: #e0f7ff;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #007BFF;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 id="title">Simple Dictionary</h1>
+
+    <div id="random-word" class="box">Click to see a random word</div>
+    <button onclick="showRandomWord()" class="button">Show Random Word</button>
+
+    <div>
+        <input type="text" id="search-box" placeholder="Search a word..." oninput="searchWord()">
+        <div id="search-results"></div>
+    </div>
+
+    <button class="button" onclick="toggleAllWords()">Show All Words</button>
+
+    <div id="all-words-container" class="box" style="display: none;">
+        <div id="all-words"></div>
+        <button onclick="prevPage()" class="button">Previous</button>
+        <button onclick="nextPage()" class="button">Next</button>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <button onclick="setLanguage('en')" class="button">English</button>
+        <button onclick="setLanguage('th')" class="button">ภาษาไทย</button>
+    </div>
+
+    <script>
+        const words = [
+            { word: "Hello", definition: "A greeting" },
+            { word: "World", definition: "The earth and all its inhabitants" },
+            { word: "Random", definition: "Made, done, or chosen without method" },
+            { word: "Click", definition: "Pressing a mouse button" }
+        ];
+
+        const translations = {
+            en: {
+                title: "Simple Dictionary",
+                randomWord: "Click to see a random word",
+                showRandomWord: "Show Random Word",
+                searchPlaceholder: "Search a word...",
+                showAllWords: "Show All Words",
+                prev: "Previous",
+                next: "Next"
+            },
+            th: {
+                title: "พจนานุกรมอย่างง่าย",
+                randomWord: "คลิกเพื่อดูคำแบบสุ่ม",
+                showRandomWord: "แสดงคำแบบสุ่ม",
+                searchPlaceholder: "ค้นหาคำ...",
+                showAllWords: "แสดงคำทั้งหมด",
+                prev: "ก่อนหน้า",
+                next: "ถัดไป"
+            }
+        };
+
+        let currentPage = 0;
+        const wordsPerPage = 5;
+
+        function setLanguage(lang) {
+            document.getElementById("title").innerText = translations[lang].title;
+            document.getElementById("random-word").innerText = translations[lang].randomWord;
+            document.querySelector("button[onclick='showRandomWord()']").innerText = translations[lang].showRandomWord;
+            document.getElementById("search-box").placeholder = translations[lang].searchPlaceholder;
+            document.querySelector("button[onclick='toggleAllWords()']").innerText = translations[lang].showAllWords;
+            document.querySelector("button[onclick='prevPage()']").innerText = translations[lang].prev;
+            document.querySelector("button[onclick='nextPage()']").innerText = translations[lang].next;
+        }
+
+        function showRandomWord() {
+            const randomWord = words[Math.floor(Math.random() * words.length)];
+            const randomWordContainer = document.getElementById("random-word");
+            randomWordContainer.innerHTML = `<b>${randomWord.word}:</b> ${randomWord.definition}`;
+        }
+
+        function searchWord() {
+            const searchTerm = document.getElementById("search-box").value.trim().toLowerCase();
+            const results = document.getElementById("search-results");
+            results.innerHTML = "";
+
+            const filteredResults = words.filter(item => item.word.toLowerCase().includes(searchTerm));
+
+            filteredResults.forEach(item => {
+                const div = document.createElement("div");
+                div.innerHTML = `<b>${item.word}:</b> ${item.definition}`;
+                results.appendChild(div);
+            });
+        }
+
+        function toggleAllWords() {
+            const container = document.getElementById("all-words-container");
+            container.style.display = container.style.display === "none" ? "block" : "none";
+            displayWords();
+        }
+
+        function displayWords() {
+            const container = document.getElementById("all-words");
+            container.innerHTML = "";
+
+            const start = currentPage * wordsPerPage;
+            const end = Math.min(start + wordsPerPage, words.length);
+
+            for (let i = start; i < end; i++) {
+                const div = document.createElement("div");
+                div.innerHTML = `<b>${words[i].word}:</b> ${words[i].definition}`;
+                container.appendChild(div);
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                displayWords();
+            }
+        }
+
+        function nextPage() {
+            if ((currentPage + 1) * wordsPerPage < words.length) {
+                currentPage++;
+                displayWords();
+            }
+        }
+
+        // Default language
+        setLanguage("en");
+    </script>
+
+</body>
+</html>
