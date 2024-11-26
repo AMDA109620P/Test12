@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Dictionary</title>
+    <title>พจนานุกรมคำแสลงไทย</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -41,6 +41,22 @@
             font-size: 16px;
         }
 
+        #search-results-container {
+            display: block;
+            margin-top: 20px;
+            width: 320px;
+        }
+
+        .word-text {
+            font-weight: bold;
+            color: #007BFF;
+        }
+
+        .definition-text {
+            font-style: italic;
+            color: #333;
+        }
+
         .button {
             background-color: #007BFF;
             color: white;
@@ -63,6 +79,19 @@
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
         }
 
+        .word-item {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #007BFF;
+        }
+
+        .word-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Search Results Box */
         #search-results {
             background-color: #e0f7ff;
             padding: 10px;
@@ -72,79 +101,63 @@
             max-height: 200px;
             overflow-y: auto;
         }
+
+        .result-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #007BFF;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
     </style>
 </head>
 <body>
 
-    <h1 id="title">Simple Dictionary</h1>
+    <h1>พจนานุกรมคำแสลงไทย</h1>
 
-    <div id="random-word" class="box">Click to see a random word</div>
-    <button onclick="showRandomWord()" class="button">Show Random Word</button>
+    <div id="random-word" class="box">คลิกเพื่อดูคำสุ่ม</div>
+    <button onclick="showRandomWord()" class="button">แสดงคำสุ่ม</button>
 
-    <div>
-        <input type="text" id="search-box" placeholder="Search a word..." oninput="searchWord()">
+    <div id="search-results-container">
+        <input type="text" id="search-box" placeholder="ค้นหาคำ..." oninput="searchWord()">
         <div id="search-results"></div>
     </div>
 
-    <button class="button" onclick="toggleAllWords()">Show All Words</button>
+    <button class="button" onclick="toggleAllWords()">แสดงคำทั้งหมด</button>
 
     <div id="all-words-container" class="box" style="display: none;">
         <div id="all-words"></div>
-        <button onclick="prevPage()" class="button">Previous</button>
-        <button onclick="nextPage()" class="button">Next</button>
-    </div>
-
-    <div style="margin-top: 20px;">
-        <button onclick="setLanguage('en')" class="button">English</button>
-        <button onclick="setLanguage('th')" class="button">ภาษาไทย</button>
+        <button onclick="prevPage()" class="button">ก่อนหน้า</button>
+        <button onclick="nextPage()" class="button">ถัดไป</button>
     </div>
 
     <script>
         const words = [
-            { word: "Hello", definition: "A greeting" },
-            { word: "World", definition: "The earth and all its inhabitants" },
-            { word: "Random", definition: "Made, done, or chosen without method" },
-            { word: "Click", definition: "Pressing a mouse button" }
+            { word: "บรรทุก", definition: "กินเกินอัตรา" },
+            { word: "บริสุทธิ์", definition: "สาวบริสุทธิ์" },
+            { word: "บวก", definition: "ชก" },
+            { word: "บวบ", definition: "อวัยวะเพศชาย" },
+            { word: "บอมบ์", definition: "กองอุจจาระ" },
+            { word: "บ๋อย", definition: "บริกรชาย" },
+            { word: "บึ้ม", definition: "ระเบิด" },
+            { word: "บูด", definition: "แย่" },
+            { word: "บูม", definition: "เป็นที่รู้จัก,โจษขานไปทั่ว" },
+            { word: "เบ๊", definition: "ผู้รับใช้,ผู้ยอมรับใช้" },
+            { word: "ใบไม้ร่าเริง", definition: "กัญชา" },
+            { word: "น่ามคาน", definition: "รำคาญ" },
+            { word: "อย่าหาทำ", definition: "หยุดทำ,อย่าคิดจะทำ" },
+            { word: "สุดตีน", definition: "ที่สุดของที่สุด" },
+            { word: "ปล่อยจอย", definition: "ปล่อยวาง,ไม่สนใจ" }
         ];
-
-        const translations = {
-            en: {
-                title: "Simple Dictionary",
-                randomWord: "Click to see a random word",
-                showRandomWord: "Show Random Word",
-                searchPlaceholder: "Search a word...",
-                showAllWords: "Show All Words",
-                prev: "Previous",
-                next: "Next"
-            },
-            th: {
-                title: "พจนานุกรมอย่างง่าย",
-                randomWord: "คลิกเพื่อดูคำแบบสุ่ม",
-                showRandomWord: "แสดงคำแบบสุ่ม",
-                searchPlaceholder: "ค้นหาคำ...",
-                showAllWords: "แสดงคำทั้งหมด",
-                prev: "ก่อนหน้า",
-                next: "ถัดไป"
-            }
-        };
 
         let currentPage = 0;
         const wordsPerPage = 5;
 
-        function setLanguage(lang) {
-            document.getElementById("title").innerText = translations[lang].title;
-            document.getElementById("random-word").innerText = translations[lang].randomWord;
-            document.querySelector("button[onclick='showRandomWord()']").innerText = translations[lang].showRandomWord;
-            document.getElementById("search-box").placeholder = translations[lang].searchPlaceholder;
-            document.querySelector("button[onclick='toggleAllWords()']").innerText = translations[lang].showAllWords;
-            document.querySelector("button[onclick='prevPage()']").innerText = translations[lang].prev;
-            document.querySelector("button[onclick='nextPage()']").innerText = translations[lang].next;
-        }
-
         function showRandomWord() {
             const randomWord = words[Math.floor(Math.random() * words.length)];
             const randomWordContainer = document.getElementById("random-word");
-            randomWordContainer.innerHTML = `<b>${randomWord.word}:</b> ${randomWord.definition}`;
+            randomWordContainer.innerHTML = `<span class="word-text">${randomWord.word}</span>: <span class="definition-text">${randomWord.definition}</span>`;
         }
 
         function searchWord() {
@@ -152,39 +165,63 @@
             const results = document.getElementById("search-results");
             results.innerHTML = "";
 
+            if (searchTerm === "") return;
+
             const filteredResults = words.filter(item => item.word.toLowerCase().includes(searchTerm));
 
-            filteredResults.forEach(item => {
-                const div = document.createElement("div");
-                div.innerHTML = `<b>${item.word}:</b> ${item.definition}`;
-                results.appendChild(div);
-            });
-        }
+            if (filteredResults.length > 0) {
+                results.style.display = "block";
+                filteredResults.forEach(item => {
+                    const div = document.createElement("div");
+                    div.classList.add("result-item");
 
-        function toggleAllWords() {
-            const container = document.getElementById("all-words-container");
-            container.style.display = container.style.display === "none" ? "block" : "none";
-            displayWords();
-        }
+                    const wordText = document.createElement("div");
+                    wordText.classList.add("word-text");
+                    wordText.innerText = item.word;
 
-        function displayWords() {
-            const container = document.getElementById("all-words");
-            container.innerHTML = "";
+                    const definitionText = document.createElement("div");
+                    definitionText.classList.add("definition-text");
+                    definitionText.innerText = item.definition;
 
-            const start = currentPage * wordsPerPage;
-            const end = Math.min(start + wordsPerPage, words.length);
-
-            for (let i = start; i < end; i++) {
-                const div = document.createElement("div");
-                div.innerHTML = `<b>${words[i].word}:</b> ${words[i].definition}`;
-                container.appendChild(div);
+                    div.appendChild(wordText);
+                    div.appendChild(definitionText);
+                    results.appendChild(div);
+                });
+            } else {
+                results.style.display = "none";
             }
         }
 
-        function prevPage() {
-            if (currentPage > 0) {
-                currentPage--;
+        function toggleAllWords() {
+            const allWordsContainer = document.getElementById("all-words-container");
+            allWordsContainer.style.display = allWordsContainer.style.display === "none" ? "block" : "none";
+            if (allWordsContainer.style.display === "block") {
                 displayWords();
+            }
+        }
+
+        function displayWords() {
+            const allWordsContainer = document.getElementById("all-words");
+            allWordsContainer.innerHTML = "";
+
+            const startIndex = currentPage * wordsPerPage;
+            const endIndex = Math.min(startIndex + wordsPerPage, words.length);
+
+            for (let i = startIndex; i < endIndex; i++) {
+                const wordItem = document.createElement("div");
+                wordItem.classList.add("word-item");
+
+                const wordText = document.createElement("div");
+                wordText.classList.add("word-text");
+                wordText.innerText = words[i].word;
+
+                const definitionText = document.createElement("div");
+                definitionText.classList.add("definition-text");
+                definitionText.innerText = words[i].definition;
+
+                wordItem.appendChild(wordText);
+                wordItem.appendChild(definitionText);
+                allWordsContainer.appendChild(wordItem);
             }
         }
 
@@ -195,8 +232,12 @@
             }
         }
 
-        // Default language
-        setLanguage("en");
+        function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                displayWords();
+            }
+        }
     </script>
 
 </body>
